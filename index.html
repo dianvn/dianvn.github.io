@@ -112,6 +112,104 @@
             color: white;
         }
 
+        /* --- MOBILE MENU STYLES (NEW) --- */
+        .menu-toggle {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%; /* Hidden by default */
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            z-index: 999;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+            border-left: 1px solid rgba(255, 107, 53, 0.2);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .mobile-sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-orange);
+        }
+
+        .mobile-links-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .mobile-links-list a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: block;
+        }
+
+        .mobile-links-list a:hover {
+            color: var(--primary-orange);
+            padding-left: 10px; /* Slight movement on hover */
+        }
+
+        .mobile-reserve-btn {
+            margin-top: auto; /* Push to bottom */
+            width: 100%;
+            text-align: center;
+            margin-left: 0;
+        }
+
         /* --- Hero Section --- */
         .hero {
             height: 100vh;
@@ -142,10 +240,10 @@
         }
 
         .hero h1 {
-            font-size: 4.5rem; /* Slightly smaller to fit Russian words */
+            font-size: 4.5rem; 
             line-height: 1.1;
             margin-bottom: 20px;
-            opacity: 0; /* Initial state for GSAP */
+            opacity: 0; 
             transform: translateY(50px);
         }
 
@@ -256,7 +354,7 @@
             border-radius: 15px;
             overflow: hidden;
             transition: transform 0.3s;
-            opacity: 0; /* Hidden for GSAP */
+            opacity: 0; 
             transform: translateY(50px);
         }
 
@@ -294,7 +392,7 @@
         }
 
         .menu-header h3 {
-            font-size: 1.35rem; /* Adjusted for longer Russian words */
+            font-size: 1.35rem; 
             color: var(--text-light);
         }
 
@@ -338,9 +436,14 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
+            nav { padding: 20px; }
             .hero h1 { font-size: 2.5rem; }
-            .about { grid-template-columns: 1fr; }
-            .nav-links { display: none; } /* Simplified for demo */
+            .about { grid-template-columns: 1fr; padding: 50px 20px; }
+            .menu-section { padding: 50px 20px; }
+            
+            /* Hide desktop Nav, Show Mobile Toggle */
+            .nav-links { display: none; } 
+            .menu-toggle { display: block; }
         }
     </style>
 </head>
@@ -348,6 +451,7 @@
 
     <nav id="navbar">
         <div class="brand">Dian</div>
+        
         <div class="nav-links">
             <a href="#home">Главная</a>
             <a href="#about">О нас</a>
@@ -355,7 +459,29 @@
             <a href="#contact">Контакты</a>
             <button class="btn-reserve">Забронировать</button>
         </div>
+
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
     </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <div class="sidebar-header">
+            <div class="brand">Dian</div>
+            <button class="close-btn" id="closeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="mobile-links-list">
+            <li><a href="#home" class="mobile-link">Главная</a></li>
+            <li><a href="#about" class="mobile-link">О нас</a></li>
+            <li><a href="#menu" class="mobile-link">Меню</a></li>
+            <li><a href="#contact" class="mobile-link">Контакты</a></li>
+        </ul>
+        <button class="btn-reserve mobile-reserve-btn">Забронировать</button>
+    </div>
 
     <header id="home" class="hero">
         <div class="hero-bg"></div>
@@ -543,6 +669,37 @@
             y: 30,
             opacity: 0,
             duration: 1
+        });
+
+        // --- MOBILE MENU FUNCTIONALITY (NEW) ---
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('mobileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        function openMenu() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeMenu() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = ''; // Restore background scrolling
+        }
+
+        // Open
+        menuToggle.addEventListener('click', openMenu);
+
+        // Close
+        closeBtn.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+
+        // Close when a link is clicked
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
         });
 
     </script>
